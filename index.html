@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Subject Selection</title>
+    <style>
+        body {
+            background-color: red; /* Red background */
+            color: white; /* White text */
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+        select, button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin-top: 10px;
+            background-color: white;
+            color: red;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: lightgray;
+        }
+        #book-location {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+        #scanner-container {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Select a Subject</h2>
+    <select id="subject">
+        <option value="math">Math</option>
+        <option value="science">Science</option>
+        <option value="history">History</option>
+        <option value="literature">Literature</option>
+    </select>
+    <br>
+    <button onclick="showLocation()">Find Book Location</button>
+
+    <div id="book-location"></div>
+
+    <h2>Or scan a QR Code to get started</h2>
+    <div id="scanner-container">
+        <h3>Scan the QR Code</h3>
+        <div id="qr-reader" style="width: 300px; height: 300px;"></div>
+    </div>
+    
+    <button onclick="startScanner()">Start QR Scan</button>
+
+    <!-- QR Code scanning library -->
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+
+    <script>
+        function showLocation() {
+            const subject = document.getElementById('subject').value;
+            let location = '';
+
+            // Map the selected subject to a book location in the library
+            switch(subject) {
+                case 'math':
+                    location = 'Section A, Row 3, Shelf 5';
+                    break;
+                case 'science':
+                    location = 'Section B, Row 2, Shelf 8';
+                    break;
+                case 'history':
+                    location = 'Section C, Row 1, Shelf 2';
+                    break;
+                case 'literature':
+                    location = 'Section D, Row 4, Shelf 3';
+                    break;
+                default:
+                    location = 'Location not found';
+            }
+
+            // Display the book location
+            document.getElementById('book-location').innerHTML = `The book is located at: ${location}`;
+        }
+
+        function startScanner() {
+            document.getElementById('scanner-container').style.display = 'block';
+            document.querySelector('button').style.display = 'none';
+
+            const html5QrCode = new Html5Qrcode("qr-reader");
+
+            // Start QR Code scanning
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                {
+                    fps: 10,    // Frame rate (frames per second)
+                    qrbox: 250  // Size of QR scanning box
+                },
+                (decodedText, decodedResult) => {
+                    console.log(`QR Code scanned: ${decodedText}`);
+                    html5QrCode.stop().then(() => {
+                        // After scanning, stop and show subject selection
+                        document.getElementById('scanner-container').style.display = 'none';
+                        document.getElementById('book-location').innerHTML = `You scanned a QR code: ${decodedText}`;
+                    }).catch(err => {
+                        console.error("Error stopping QR scanner", err);
+                    });
+                },
+                (errorMessage) => {
+                    // Handle scan error if needed
+                }
+            ).catch(err => {
+                console.error("Error starting QR scanner", err);
+            });
+        }
+    </script>
+
+</body>
+</html>
